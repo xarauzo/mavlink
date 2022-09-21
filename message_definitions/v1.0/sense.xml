@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<mavlink>
+  <!-- SENSE message definitions                                       -->
+  <!--                                                                 -->
+  <!-- email contacts:                                                 -->
+  <!--                 Sense Aeronautics                               -->
+  <!-- mavlink ID range 50000 - 50099                                  -->
+
+  <include>common.xml</include>
+  <include>ardupilotmega.xml</include>
+
+  <!-- NOTE: If the included file already contains a version tag, remove the version tag here, else uncomment to enable. -->
+  <!-- <version>6</version> -->
+
+  <enums>
+    <enum name="PIPELINE_STATE">
+      <description>Status flags for DAA Pipeline status</description>
+      <entry value="0" name="PIPELINE_STATE_OFF"/>
+      <entry value="1" name="PIPELINE_STATE_ON"/>
+    </enum>
+    <enum name="MANEUVER_TYPE">
+      <description>Type of avoidance maneuver</description>
+      <entry value="0" name="MANEUVER_TYPE_UPWARDS"/>
+      <entry value="1" name="MANEUVER_TYPE_RIGHT_DODGE"/>
+    </enum>
+    <enum name="SENSE_THREAT_LEVEL">
+      <description>Threat level definition based on distance and other metrics.</description>
+      <entry name="SENSE_THREAT_NONE" value="0"/>
+      <entry name="SENSE_THREAT_DETECTED" value="1"/>
+      <entry name="SENSE_THREAT_NEAR" value="2"/>
+      <entry name="SENSE_THREAT_AVOID" value="3"/>
+    </enum>
+  </enums>
+
+  <messages>
+    <!-- Messages specifically designated for Sense-Air service -->
+    <message id="50000" name="SENSE_HEARTBEAT">
+      <description>Pipeline heartbeat with health report (updated at 1Hz)</description>
+      <field type="uint8_t" name="status" enum="PIPELINE_STATE">See the SENSE_STATE enum.</field>
+    </message>
+    <message id="50001" name="SENSE_TIME">
+      <description>Time of startup/termination of Sense-Air service.</description>
+      <field type="uint64_t" name="time_unix_usec" units="us">Timestamp (UNIX epoch time).</field>
+      <field type="uint8_t" name="status" enum="PIPELINE_STATE">See the SENSE_STATE enum.</field>
+    </message>
+    <message id="50002" name="SENSE_AR">
+      <description>Avoidance request to Remote Pilot in Loop (RPiL).</description>
+      <field type="uint64_t" name="time_unix_usec" units="us">Timestamp (UNIX epoch time).</field>
+      <field type="uint8_t" name="request">Request flag</field>
+      <field type="uint8_t" name="maneuver_type" enum="MANEUVER_TYPE">See the MANEUVER_TYPE enum.</field>
+    </message>
+    <message id="50003" name="SENSE_DAA">
+      <description>Detection and Avoidance data.</description>
+      <field type="uint64_t" name="time_unix_usec" units="us">Timestamp (UNIX epoch time).</field>
+      <field type="uint8_t" name="target_system">System ID</field>
+      <field type="uint8_t" name="target_component">Component ID</field>
+      <field type="uint32_t" name="frame_num">Frame number</field>
+      <field type="uint16_t" name="tracker_id">Tracker ID</field>
+      <field type="float[4]" name="bbox" units="pix">Bounding Box dimensions [top, left, height, width].</field>
+      <field type="float" name="confidence" units="%">Confidence (probability).</field>
+      <field type="float" name="target_range" units="m">Estimated distance to detected target.</field>
+      <field type="float[3]" name="target_relative_vector" units="m">Estimated relative vector to detected target, defined in camera axes.</field>
+      <field type="uint16_t" name="threat_level" enum="SENSE_THREAT_LEVEL">Threat level for detected object.</field>
+    </message>
+    <message id="50004" name="SENSE_STATE_VECTOR">
+      <description>State vector of ownship UAS.</description>
+      <field type="uint64_t" name="time_unix_usec" units="us">Timestamp (UNIX epoch time).</field>
+      <field type="uint8_t" name="target_system">System ID</field>
+      <field type="uint8_t" name="target_component">Component ID</field>
+      <field type="uint32_t" name="longitude" units="degE7">Longitude</field>
+      <field type="uint32_t" name="latitude" units="degE7">Geodetic Latitude</field>
+      <field type="uint32_t" name="altitude" units="degE7">Ellipsoidal Altitude</field>
+      <field type="float[4]" name="quaternion">Quaternion defining UAS orientation.</field>
+      <field type="float" name="roll" units="rad">Roll attitude angle.</field>
+      <field type="float" name="pitch" units="rad">Pitch attitude angle.</field>
+      <field type="float" name="yaw" units="rad">Yaw attitude angle.</field>
+    </message>
+    <message id="50005" name="SENSE_AV_MAN">
+      <description>Avoidance Maneuver trajectory data.</description>
+      <field type="uint64_t" name="time_unix_usec" units="us">Timestamp (UNIX epoch time).</field>
+      <field type="uint8_t" name="target_system">System ID</field>
+      <field type="uint8_t" name="target_component">Component ID</field>
+      <field type="float[5]" name="waypoint_x" units="degE7">X-coordinate of waypoint in sphericals state type (Longitude)</field>
+      <field type="float[5]" name="waypoint_y" units="degE7">Y-coordinate of waypoint in sphericals state type (Latitude)</field>
+      <field type="float[5]" name="waypoint_z" units="degE7">Z-coordinate of waypoint in sphericals state type (Altitude)</field>
+    </message>
+  </messages>
+</mavlink>
